@@ -1,4 +1,5 @@
-from threading import Thread, Barrier
+from threading import Barrier
+from gil_sem import ResultThread as Thread, start_and_await, report_error_or_success
 
 
 class A:
@@ -251,13 +252,9 @@ def thread_fn(expected_int, obj, barrier):
 shared_list = []
 b = Barrier(2)
 threads = [
-    Thread(target=thread_fn, args=(1, A(), b)),
-    Thread(target=thread_fn, args=(2, B(), b)),
+    Thread(thread_fn, (1, A(), b)),
+    Thread(thread_fn, (2, B(), b)),
 ]
 
-for t in threads:
-    t.start()
-for t in threads:
-    t.join()
-
-print("Done")
+results = start_and_await(threads)
+report_error_or_success(results)

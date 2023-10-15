@@ -19,3 +19,4 @@ for t in threads:
 end_time = perf_counter_ns()
 
 print(f"Time taken: {(end_time - start_time) // 1_000_000} ms")
+print("Success")

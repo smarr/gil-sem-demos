@@ -62,3 +62,13 @@ def start_and_await(threads):
                 results.append(t)
         threads = remaining_threads
     return results
+
+
+def report_error_or_success(results):
+    """
+    Print the errors of the threads, or no thread failed, print "Success".
+    """
+    for r in results:
+        if r.assertion:
+            raise r.assertion
+    print("Success")

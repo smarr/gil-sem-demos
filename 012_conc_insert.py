@@ -1,4 +1,4 @@
-from gil_sem import ResultThread as Thread, start_and_await
+from gil_sem import ResultThread as Thread, start_and_await, report_error_or_success
 import sys
 import time
 
@@ -29,6 +29,4 @@ threads = [
 ]
 
 results = start_and_await(threads)
-for r in results:
-    if r.assertion:
-        raise r.assertion
+report_error_or_success(results)

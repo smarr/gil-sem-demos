@@ -1,4 +1,4 @@
-from threading import Thread
+from gil_sem import ResultThread as Thread, start_and_await, report_error_or_success
 
 
 def insert_remove_fn(list):
@@ -20,13 +20,9 @@ def contains_and_size_fn(list):
 
 shared_list = []
 threads = [
-    Thread(target=insert_remove_fn, args=(shared_list,)),
-    Thread(target=contains_and_size_fn, args=(shared_list,)),
+    Thread(insert_remove_fn, (shared_list,)),
+    Thread(contains_and_size_fn, (shared_list,)),
 ]
 
-for t in threads:
-    t.start()
-for t in threads:
-    t.join()
-
-print("Done")
+results = start_and_await(threads)
+report_error_or_success(results)
