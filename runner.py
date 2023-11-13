@@ -4,6 +4,7 @@
 import re
 import subprocess
 import sys
+import tokenize
 from os import listdir
 
 
@@ -78,14 +79,44 @@ def run_test(e, fn, extra_arg):
         python_details[e].failed += 1
 
 
-for fn in test_files:
-    print(fn)
-    print("-" * len(fn))
+def remove_leading_hash(s):
+    while s.startswith("#"):
+        s = s[1:].strip()
+    return s
+
+
+def extract_main_comment(file_name):
+    with tokenize.open(file_name) as f:
+        tokens = tokenize.generate_tokens(f.readline)
+
+        comment_not_started = True
+        comment_text = []
+
+        for token in tokens:
+            if token.type is tokenize.NL:
+                continue
+            if token.type is tokenize.COMMENT:
+                comment_not_started = False
+                comment_text.append(remove_leading_hash(token.string))
+            else:
+                if not comment_not_started:
+                    break
+        return "\n".join(comment_text)
+
+
+for file_name in test_files:
+    print(file_name)
+    print("-" * len(file_name))
     print()
 
+    comment = extract_main_comment(file_name)
+    if comment:
+        print(comment)
+        print()
+
     for e in PYTHON_EXECUTABLES:
-        run_test(e, fn, "                         ")
-        run_test(e, fn, "--minimal-switch-interval")
+        run_test(e, file_name, "                         ")
+        run_test(e, file_name, "--minimal-switch-interval")
 
     print()
 
