@@ -10,10 +10,10 @@ from os import listdir
 # 1. list of python executables to test
 PYTHON_EXECUTABLES = [
     "../cpython39/python.exe",
-    # "../cpython310/python.exe",
+    "../cpython310/python.exe",
     "../cpython311/python.exe",
-    # "../cpython312/python.exe",
-    # "../cpython313/python.exe",
+    "../cpython312/python.exe",
+    "../cpython313/python.exe",
     "../pypy3.9-v7.3.13-macos_arm64/bin/pypy3.9",
     "../pypy3.10-v7.3.13-macos_arm64/bin/pypy3.10",
 ]
