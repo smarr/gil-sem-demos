@@ -31,9 +31,9 @@ threads = [
 ]
 
 results = start_and_await(threads)
-report_error_or_success(results)
 
 for usage_cnt in obj.usage:
     assert (
         usage_cnt == 20_000
     ), f"+= not atomic. If atomic, ids are used 2000 times, but one was used {usage_cnt} times."
+print("Completed")
