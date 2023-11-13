@@ -2,6 +2,8 @@ from threading import Thread
 from time import perf_counter_ns
 import sys
 
+# Demonstrate the impact of switching threads and no-GIL on performance.
+
 if "--minimal-switch-interval" in sys.argv:
     sys.setswitchinterval(0.000000000001)
 

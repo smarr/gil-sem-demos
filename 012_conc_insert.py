@@ -2,6 +2,9 @@ from gil_sem import ResultThread as Thread, start_and_await, report_error_or_suc
 import sys
 import time
 
+# Check whether a loop with len;in can observe non-atomic behavior
+# when another thread is running a loop with append;pop;append;pop.
+
 
 def insert_remove_fn(list):
     for i in range(100_000_000):

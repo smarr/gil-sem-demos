@@ -1,5 +1,8 @@
 from gil_sem import ResultThread as Thread, start_and_await, report_error_or_success
 
+# Check whether a loop with len;in can observe non-atomic behavior
+# when another thread is running a loop with append;pop.
+
 
 def insert_remove_fn(list):
     for _ in range(100_000_000):

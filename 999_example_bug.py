@@ -1,4 +1,7 @@
-from gil_sem import ResultThread as Thread, start_and_await, report_error_or_success
+from gil_sem import ResultThread as Thread, start_and_await
+
+# This example is derived from https://github.com/deltachat/deltachat-core-rust/pull/4947
+# and demonstrates that the += operator is not atomic on some Python implementations/versions.
 
 
 class Example(object):
