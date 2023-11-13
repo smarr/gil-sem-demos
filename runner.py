@@ -94,6 +94,6 @@ for fn in test_files:
 
 for e in PYTHON_EXECUTABLES:
     print(e, "\t", python_details[e].version)
-    print("\t", "Completed:", python_details[e].completed)
-    print("\t", "Failed:", python_details[e].failed)
+    print("\t", "Completed:\t", python_details[e].completed)
+    print("\t", "Failed:\t", python_details[e].failed)
     print()
