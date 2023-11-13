@@ -56,19 +56,20 @@ test_files.sort()
 
 
 def run_test(e, fn, extra_arg):
+    cmd = " ".join([e, fn, extra_arg])
     result = subprocess.run([e, fn, extra_arg], capture_output=True)
     lines = result.stdout.decode("utf-8").strip().split("\n")
     success = lines[-1] == "Completed"
     out = lines[:-1]
 
     if success:
-        print(e, "\t", extra_arg, "Completed", "\t", out[0] if len(out) > 0 else "")
+        print(cmd, "\t", "Completed", "\t", out[0] if len(out) > 0 else "")
         python_details[e].completed += 1
     else:
         err = result.stderr.decode("utf-8").strip().split("\n")
         last_err = err[-1]
         last_err = last_err.replace("AssertionError: ", "")
-        print(e, "\t", extra_arg, "Failed", "\t", last_err)
+        print(cmd, "\t", "Failed", "\t", last_err)
         python_details[e].failed += 1
 
 
