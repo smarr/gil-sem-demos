@@ -3,6 +3,7 @@
 
 import re
 import subprocess
+import sys
 from os import listdir
 
 
@@ -52,6 +53,8 @@ print()
 test_files = [f for f in listdir(".") if re.match(r"\d{3}\_.*\.py", f) is not None]
 test_files.sort()
 
+if len(sys.argv) > 1:
+    test_files = sys.argv[1:]
 
 # 3. for each test
 #   - print the name (1st file name, then later descriptive name)
