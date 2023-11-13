@@ -29,7 +29,9 @@ python_details = {}
 
 class Details:
     def __init__(self, version):
-        self.version = version
+        v = version.split("\n")
+        self.version = v[0]
+        self.version_complete = version
         self.completed = 0
         self.failed = 0
 
