@@ -15,7 +15,9 @@ def contains_and_size_fn(list):
             c = True
         except IndexError:
             c = False
-        assert (not c and l == 0) or (c and l == 1)
+        assert (not c and l == 0) or (
+            c and l == 1
+        ), f"append;pop not atomic, or not atomically observable. length: {l}, element in list: {c}"
 
 
 shared_list = []

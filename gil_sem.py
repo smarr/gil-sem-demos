@@ -44,6 +44,11 @@ def start_and_await(threads):
     If any thread raises an AssertionError,
     it is returned as result.
     """
+    import sys
+
+    if "--minimal-switch-interval" in sys.argv:
+        sys.setswitchinterval(0.000000000001)
+
     for t in threads:
         t.start()
 
@@ -71,4 +76,4 @@ def report_error_or_success(results):
     for r in results:
         if r.assertion:
             raise r.assertion
-    print("Success")
+    print("Completed")

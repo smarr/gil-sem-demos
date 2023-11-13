@@ -11,7 +11,9 @@ def contains_and_size_fn(list):
     for _ in range(100_000_000):
         l = len(list)
         c = 1 in list
-        assert (not c and l == 0) or (c and l == 1)
+        assert (not c and l == 0) or (
+            c and l == 1
+        ), f"append;pop not atomic, or not atomically observable. length: {l}, element in list: {c}"
 
 
 shared_list = []

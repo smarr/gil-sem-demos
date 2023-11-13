@@ -1,10 +1,14 @@
 from threading import Thread
 from time import perf_counter_ns
+import sys
+
+if "--minimal-switch-interval" in sys.argv:
+    sys.setswitchinterval(0.000000000001)
 
 
 def thread_fn(thread_id):
     i = 0
-    for _ in range(100_000_000):
+    for _ in range(10_000_000):
         i += 1
 
 
@@ -19,4 +23,4 @@ for t in threads:
 end_time = perf_counter_ns()
 
 print(f"Time taken: {(end_time - start_time) // 1_000_000} ms")
-print("Success")
+print("Completed")
