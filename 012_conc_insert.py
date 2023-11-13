@@ -2,13 +2,12 @@ from gil_sem import ResultThread as Thread, start_and_await, report_error_or_suc
 import sys
 import time
 
-sys.setswitchinterval(0.0000001)
-
 
 def insert_remove_fn(list):
     for i in range(100_000_000):
         list.append(1)
-        time.sleep(0.0)
+        list.pop()
+        list.append(1)
         list.pop()
     return True
 
@@ -16,9 +15,10 @@ def insert_remove_fn(list):
 def contains_and_size_fn(list):
     for _ in range(100_000_000):
         l = len(list)
-        time.sleep(0.0)
         c = 1 in list
-        assert (not c and l == 0) or (c and l == 1)
+        assert (not c and l == 0) or (
+            c and l == 1
+        ), f"loop bodies not atomic. length: {l}, element in list: {c}"
     return True
 
 
