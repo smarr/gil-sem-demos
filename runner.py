@@ -35,7 +35,7 @@ class Details:
         self.version = v[0]
         self.version_complete = version
         self.completed = 0
-        self.failed = 0
+        self.aborted = 0
 
 
 for e in PYTHON_EXECUTABLES:
@@ -75,8 +75,8 @@ def run_test(e, fn, extra_arg):
         err = result.stderr.decode("utf-8").strip().split("\n")
         last_err = err[-1]
         last_err = last_err.replace("AssertionError: ", "")
-        print(cmd, "\t", "Failed", "\t", last_err)
-        python_details[e].failed += 1
+        print(cmd, "\t", "Aborted", "\t", last_err)
+        python_details[e].aborted += 1
 
 
 def remove_leading_hash(s):
@@ -121,10 +121,10 @@ for file_name in test_files:
     print()
 
 
-# 4. print summary that shows how many tests failed for each executable
+# 4. print summary that shows statistics for each executable
 
 for e in PYTHON_EXECUTABLES:
     print(e, "\t", python_details[e].version)
     print("\t", "Completed:\t", python_details[e].completed)
-    print("\t", "Failed:\t", python_details[e].failed)
+    print("\t", "Aborted:\t", python_details[e].aborted)
     print()
