@@ -17,16 +17,6 @@ def insert_fn(list):
     return True
 
 
-def remove_fn(list):
-    for i in range(100_000_000):
-        try:
-            list.pop()
-            list.pop()
-        except IndexError:
-            pass
-    return True
-
-
 def size_fn(list):
     for i in range(100_000_000):
         l = len(list)
@@ -37,7 +27,6 @@ def size_fn(list):
 shared_list = []
 threads = [
     Thread(insert_fn, (shared_list,)),
-    # Thread(remove_fn, (shared_list,)),
     Thread(size_fn, (shared_list,)),
 ]
 
