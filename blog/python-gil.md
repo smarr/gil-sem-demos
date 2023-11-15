@@ -3,16 +3,19 @@ title: The Changing "Guarantees" Given by Python's Global Interpreter Lock
 ---
 # The Changing "Guarantees" Given by Python's Global Interpreter Lock
 
+> Draft. To be published on [my blog](https://stefan-marr.de/).
+
 In this blog post, I will look into the implementation details of CPython's Global Interpreter Lock (GIL)
-and how they changed in between Python 3.9 and the current development branch that will become Python 3.13.
+and how they changed between Python 3.9 and the current development branch that will become Python 3.13.
 
 My goal is to understand which concrete guarantees the GIL gives in both version,
 which guarantees it does not give,
 and which ones one might assume based on testing and observation.
 
-While Python has various implementations including CPython, PyPy, Jython, IronPython, and GraalPy,
+While Python has various implementations,
+including CPython, PyPy, Jython, IronPython, and GraalPy,
 I'll focus on CPython as the most widely used implementation.
-Though, PyPy and GraalPy are known to also use a GIL,
+Though, PyPy and GraalPy also use a GIL,
 but their implementations subtly differ from CPython's,
 as we will see a little later.
 
@@ -29,7 +32,7 @@ and use a single global lock, the GIL, to protect all of these data structures f
 As a result, one can start multiple threads in CPython,
 though only a single of them runs Python bytecode at any given time.
 
-The many benefit of this approach is its simplicity and single-threaded performance.
+The main benefit of this approach is its simplicity and single-threaded performance.
 Because there's only a single lock to worry about,
 it's easy to get the implementation correct without risking deadlocks or other subtle concurrency bugs
 at the level of the CPython interpreter.
@@ -39,8 +42,8 @@ Thus, the GIL represented a suitable point in the engineering trade-off space be
 
 Of course, the obvious downside of this design is
 that only a single thread can execute Python bytecode at any given time.
-Note, I am again talking about Python bytecode here.
-This is because operations that may take a long time, for instance reading a file into memory,
+I am talking about Python bytecode here again,
+because operations that may take a long time, for instance reading a file into memory,
 can release the GIL and allow other threads to run in parallel.
 
 For programs that spend most of their time executing Python code,
@@ -55,18 +58,18 @@ So far, I only mentioned that the GIL is there to protect CPython's internal dat
 from concurrent accesses to ensure correctness.
 However, when writing Python code, I am more interested in the correctness guarantees the GIL gives me
 for the concurrent code that I write.
-To answer this, we need to delve into the implementation details of when the GIL is acquired and released.
+To know these correctness guarantees, we need to delve into the implementation details of when the GIL is acquired and released.
 
 The general approach is that a Python thread obtains the GIL when it starts executing Python bytecode.
 It will hold the GIL as long as it needs to and eventually release it, for instance when it is done executing,
-or when it is executing some operation that often would be long-running, and itself does not require the GIL for correctness.
+or when it is executing some operation that often would be long-running and itself does not require the GIL for correctness.
 This includes for instance the aforementioned file reading operation or more generally any I/O operation.
 However, a thread may also release the GIL when executing specific bytecodes.
 
 This is where Python 3.9 and 3.13 differ substantially.
 Let's start with Python 3.13, which I think roughly corresponds to what Python is doing since version 3.10.
 Here, the most relevant bytecodes are for function or method calls
-as well as bytecodes that jump back to the top of a loop or method.
+as well as bytecodes that jump back to the top of a loop or function.
 Thus, only a very small set of bytecodes check whether there was a request to release the GIL.
 
 In contrast, in Python 3.9 and earlier versions,
@@ -128,7 +131,7 @@ def get_id(self):
 
 Running this on multiple threads will allow us to observe an inconsistent number of `usage` counts.
 They should be all the same, but they are not.
-Arguably, it's not clear whether they atomicity issue is from the `request_id` or the `usage` counts,
+Arguably, it's not clear whether the observed atomicity issue is from the `request_id` or the `usage` counts,
 but the underlying issue is the same in both cases.
 For the full example see [999_example_bug.py](https://github.com/smarr/gil-sem-demos/blob/main/999_example_bug.py).
 
@@ -142,7 +145,7 @@ strong guarantees that Python 3.13 gives.
 
 As mentioned earlier,
 because the GIL is released based on a timeout,
-one may also perceive bytecode sequences as atomic in when experimenting.
+one may also perceive bytecode sequences as atomic when experimenting.
 
 Let's assume we run the following two functions on threads in parallel:
 
@@ -197,12 +200,12 @@ are pretty much atomic.
 For PyPy and GraalPy, it is also harder to observe the bytecode-level atomicity granularity,
 because they are simply faster.
 Lowering the switch interval makes it a little more observable,
-except for GraalPy, which likely optimizes the checks whether to release the GIL away more aggressively.
+except for GraalPy, which likely aggressively removes the checks whether to release the GIL.
 
 Another detail for the no-GIL implementation: it crashes for our earlier bug example.
 It complains about `*** stack smashing detected ***`.
 
-A full log is available at as a [gist](https://gist.github.com/smarr/684e71be23a0a393f06739e0303cbc70#file-01-log-x86).
+A full log is available as a [gist](https://gist.github.com/smarr/684e71be23a0a393f06739e0303cbc70#file-01-log-x86).
 
 ### 6. Conclusion
 
@@ -222,7 +225,7 @@ single-threaded performance of CPython.
 To enable people to test their code on these versions closer to semantics
 that match a no-GIL implementation,
 I would suggest to add a compile-time option that forces
-a GIL released and thread switch after every bytecode that may trigger behavior
+a GIL release and thread switch after bytecodes that may trigger behavior
 visible to other threads.
 This way, people would have a chance to test on a stable system that is closer
 to the future semantics and probably only minimally slower.
