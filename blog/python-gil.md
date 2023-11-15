@@ -8,7 +8,7 @@ title: The Changing "Guarantees" Given by Python's Global Interpreter Lock
 In this blog post, I will look into the implementation details of CPython's Global Interpreter Lock (GIL)
 and how they changed between Python 3.9 and the current development branch that will become Python 3.13.
 
-My goal is to understand which concrete guarantees the GIL gives in both version,
+My goal is to understand which concrete guarantees the GIL gives in both versions,
 which guarantees it does not give,
 and which ones one might assume based on testing and observation.
 
@@ -47,9 +47,9 @@ because operations that may take a long time, for instance reading a file into m
 can release the GIL and allow other threads to run in parallel.
 
 For programs that spend most of their time executing Python code,
-the GIL is of course a huge performance bottleneck
+the GIL is of course a huge performance bottleneck,
 and thus, [PEP 703](https://peps.python.org/pep-0703/) proposes to make the GIL optional.
-The PEP mentions various use case, including machine learning, data science, and other numerical applications.
+The PEP mentions various use cases, including machine learning, data science, and other numerical applications.
 
 
 ### 3. Which Guarantees Does the GIL Provide?
@@ -67,10 +67,10 @@ This includes for instance the aforementioned file reading operation or more gen
 However, a thread may also release the GIL when executing specific bytecodes.
 
 This is where Python 3.9 and 3.13 differ substantially.
-Let's start with Python 3.13, which I think roughly corresponds to what Python is doing since version 3.10.
+Let's start with Python 3.13, which I think roughly corresponds to what Python has been doing since version 3.10.
 Here, the most relevant bytecodes are for function or method calls
 as well as bytecodes that jump back to the top of a loop or function.
-Thus, only a very small set of bytecodes check whether there was a request to release the GIL.
+Thus, only a few bytecodes check whether there was a request to release the GIL.
 
 In contrast, in Python 3.9 and earlier versions,
 the GIL is released at least in some situations by almost all bytecodes.
@@ -94,7 +94,7 @@ For Python 3.13, this should mean that a function that contains only bytecodes
 that do not lead to a `CHECK_EVAL_BREAKER()` check should be atomic.
 
 For Python 3.9, this means a very small set of bytecode sequences can be atomic,
-though, except for tiny set of specific cases, one can assume that a bytecode sequence is not atomic. 
+though, except for a tiny set of specific cases, one can assume that a bytecode sequence is not atomic. 
 
 However, since the Python community is taking steps that may lead to the removal of the GIL,
 the changes in recent Python versions to give much stronger atomicity guarantees
@@ -168,7 +168,7 @@ def size_fn(list):
 
 Depending on how fast the machine is, it may take 10,000 or more iterations of the loop
 in `size_fn` before we see the length of the list to be odd.
-This means, it takes 10,000 iterations before the function calls to append or pop allowed
+This means it takes 10,000 iterations before the function calls to append or pop allowed
 the GIL to be released before the second `append(1)` or after the first `pop()`.
 
 Without looking at the CPython source code, one might have concluded easily
@@ -184,7 +184,7 @@ one can observe an odd list length after only a few or few hundred iterations of
 In my [gil-sem-demos](https://github.com/smarr/gil-sem-demos/) repository,
 I have a number of examples that try to demonstrate observable differences in GIL behavior.
 
-Of course, the very first example, tries to show the performance benefit
+Of course, the very first example tries to show the performance benefit
 of running multiple Python threads in parallel.
 Using the [no-GIL implementation](https://github.com/colesbury/nogil-3.12),
 one indeed sees the expected parallel speedup.
@@ -200,7 +200,7 @@ are pretty much atomic.
 For PyPy and GraalPy, it is also harder to observe the bytecode-level atomicity granularity,
 because they are simply faster.
 Lowering the switch interval makes it a little more observable,
-except for GraalPy, which likely aggressively removes the checks whether to release the GIL.
+except for GraalPy, which likely aggressively removes the checks for whether to release the GIL.
 
 Another detail for the no-GIL implementation: it crashes for our earlier bug example.
 It complains about `*** stack smashing detected ***`.
@@ -214,7 +214,7 @@ The semantics between Python 3.9 and 3.13 differ substantially.
 Python 3.13 gives much stronger atomicity guarantees,
 releasing the GIL basically only on function calls and jumps back to the top of a loop or function.
 
-If the Python community intents to remove the GIL,
+If the Python community intends to remove the GIL,
 this seems problematic.
 I would expect more people to implicitly rely on these much stronger guarantees,
 whether consciously or not.
@@ -224,7 +224,7 @@ single-threaded performance of CPython.
 
 To enable people to test their code on these versions closer to semantics
 that match a no-GIL implementation,
-I would suggest to add a compile-time option that forces
+I would suggest to add a compile-time option to CPython that forces
 a GIL release and thread switch after bytecodes that may trigger behavior
 visible to other threads.
 This way, people would have a chance to test on a stable system that is closer
