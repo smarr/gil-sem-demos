@@ -8,9 +8,11 @@ title: The Changing "Guarantees" Given by Python's Global Interpreter Lock
 In this blog post, I will look into the implementation details of CPython's Global Interpreter Lock (GIL)
 and how they changed between Python 3.9 and the current development branch that will become Python 3.13.
 
-My goal is to understand which concrete guarantees the GIL gives in both versions,
-which guarantees it does not give,
+My goal is to understand which concrete "guarantees" the GIL gives in both versions,
+which "guarantees" it does not give,
 and which ones one might assume based on testing and observation.
+I am putting "guarantees" in quotes, because with a future no-GIL Python,
+none of the discussed properties should be considered language guarantees.
 
 While Python has various implementations,
 including CPython, PyPy, Jython, IronPython, and GraalPy,
@@ -38,7 +40,7 @@ it's easy to get the implementation correct without risking deadlocks or other s
 at the level of the CPython interpreter.
 Thus, the GIL represented a suitable point in the engineering trade-off space between correctness and performance.
 
-### 2. Why Does the Python Community Think About Removing It?
+### 2. Why Does the Python Community Think About Removing the GIL?
 
 Of course, the obvious downside of this design is
 that only a single thread can execute Python bytecode at any given time.
@@ -52,13 +54,13 @@ and thus, [PEP 703](https://peps.python.org/pep-0703/) proposes to make the GIL 
 The PEP mentions various use cases, including machine learning, data science, and other numerical applications.
 
 
-### 3. Which Guarantees Does the GIL Provide?
+### 3. Which "Guarantees" Does the GIL Provide?
 
 So far, I only mentioned that the GIL is there to protect CPython's internal data structures
 from concurrent accesses to ensure correctness.
-However, when writing Python code, I am more interested in the correctness guarantees the GIL gives me
+However, when writing Python code, I am more interested in the "correctness guarantees" the GIL gives me
 for the concurrent code that I write.
-To know these correctness guarantees, we need to delve into the implementation details of when the GIL is acquired and released.
+To know these "correctness guarantees", we need to delve into the implementation details of when the GIL is acquired and released.
 
 The general approach is that a Python thread obtains the GIL when it starts executing Python bytecode.
 It will hold the GIL as long as it needs to and eventually release it, for instance when it is done executing,
@@ -67,7 +69,7 @@ This includes for instance the aforementioned file reading operation or more gen
 However, a thread may also release the GIL when executing specific bytecodes.
 
 This is where Python 3.9 and 3.13 differ substantially.
-Let's start with Python 3.13, which I think roughly corresponds to what Python has been doing since version 3.10.
+Let's start with Python 3.13, which I think roughly corresponds to what Python has been doing since version 3.10 (roughly since [this PR](https://github.com/python/cpython/pull/18334)).
 Here, the most relevant bytecodes are for function or method calls
 as well as bytecodes that jump back to the top of a loop or function.
 Thus, only a few bytecodes check whether there was a request to release the GIL.
@@ -97,8 +99,10 @@ For Python 3.9, this means a very small set of bytecode sequences can be atomic,
 though, except for a tiny set of specific cases, one can assume that a bytecode sequence is not atomic. 
 
 However, since the Python community is taking steps that may lead to the removal of the GIL,
-the changes in recent Python versions to give much stronger atomicity guarantees
+the changes in recent Python versions to give much stronger atomicity "guarantees"
 are likely a step in the wrong direction for the correctness of concurrent Python code.
+I mean this in the sense of people to accidentally rely on these implementation details,
+leading to hard to find concurrency bugs when running on a no-GIL Python.
 
 
 ### 4. Which Guarantees Might One Incorrectly Assume the GIL Provides?
@@ -111,7 +115,7 @@ request_id = self._next_id
 self._next_id += 1
 ```
 
-This is a classic problem, you want to hand out unique request ids,
+The code tries to solve a classic problem: we want to hand out unique request ids,
 but it breaks when multiple threads execute this code at the same time,
 or rather interleaved with each other.
 Because then we end up getting the same id multiple times.
@@ -211,7 +215,7 @@ A full log is available as a [gist](https://gist.github.com/smarr/684e71be23a0a3
 
 In this blog post, I looked into the implementation details of CPython's Global Interpreter Lock (GIL).
 The semantics between Python 3.9 and 3.13 differ substantially.
-Python 3.13 gives much stronger atomicity guarantees,
+Python 3.13 gives much stronger atomicity "guarantees",
 releasing the GIL basically only on function calls and jumps back to the top of a loop or function.
 
 If the Python community intends to remove the GIL,
@@ -228,4 +232,4 @@ I would suggest to add a compile-time option to CPython that forces
 a GIL release and thread switch after bytecodes that may trigger behavior
 visible to other threads.
 This way, people would have a chance to test on a stable system that is closer
-to the future semantics and probably only minimally slower.
+to the future no-GIL semantics and probably only minimally slower at executing unit tests.
