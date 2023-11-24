@@ -1,4 +1,5 @@
 from threading import Thread
+from time import time
 
 
 class ResultThread(Thread):
@@ -16,6 +17,7 @@ class ResultThread(Thread):
         self.args = args
         self.result = None
         self.assertion = None
+        self.did_time_out = False
 
         self.daemon = True
 
@@ -36,7 +38,7 @@ class ResultThread(Thread):
         return self.result
 
 
-def start_and_await(threads):
+def start_and_await(threads, max_time_in_s=None):
     """
     Start threads and wait for them to finish
     and return their results.
@@ -45,6 +47,10 @@ def start_and_await(threads):
     it is returned as result.
     """
     import sys
+
+    start_time = 0
+    if max_time_in_s is not None:
+        start_time = time()
 
     if "--minimal-switch-interval" in sys.argv:
         sys.setswitchinterval(0.000000000001)
@@ -66,6 +72,12 @@ def start_and_await(threads):
                     no_failure = False
                 results.append(t)
         threads = remaining_threads
+        if max_time_in_s is not None:
+            if time() - start_time > max_time_in_s:
+                for t in remaining_threads:
+                    t.did_time_out = True
+                    results.append(t)
+                break
     return results
 
 
