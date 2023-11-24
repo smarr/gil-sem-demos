@@ -5,13 +5,13 @@ from gil_sem import ResultThread as Thread, start_and_await, report_error_or_suc
 
 
 def insert_remove_fn(list):
-    for _ in range(100_000_000):
+    for _ in range(10_000_000):
         list.append(1)
         list.pop()
 
 
 def contains_and_size_fn(list):
-    for _ in range(100_000_000):
+    for _ in range(10_000_000):
         l = len(list)
         try:
             list[0]

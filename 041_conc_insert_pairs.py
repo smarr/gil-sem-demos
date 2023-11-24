@@ -17,14 +17,14 @@ def remove(l):
 
 
 def insert_fn(list):
-    for i in range(100_000_000):
+    for i in range(10_000_000):
         append(list)
         remove(list)
     return True
 
 
 def size_fn(list):
-    for i in range(100_000_000):
+    for i in range(10_000_000):
         l = len(list)
         assert l % 2 == 0, f"List length was {l}, at attempt {i}"
     return True

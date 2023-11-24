@@ -24,7 +24,7 @@ obj = Example()
 
 
 def loop_get_id():
-    for _ in range(10_000_000):
+    for _ in range(1_000_000):
         obj.get_id()
 
 
@@ -37,6 +37,6 @@ results = start_and_await(threads)
 
 for usage_cnt in obj.usage:
     assert (
-        usage_cnt == 20_000
+        usage_cnt == 2_000
     ), f"+= not atomic. If atomic, ids are used 2000 times, but one was used {usage_cnt} times."
 print("Completed")

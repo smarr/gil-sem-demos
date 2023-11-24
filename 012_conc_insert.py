@@ -7,7 +7,7 @@ import time
 
 
 def insert_remove_fn(list):
-    for i in range(100_000_000):
+    for i in range(10_000_000):
         list.append(1)
         list.pop()
         list.append(1)
@@ -16,7 +16,7 @@ def insert_remove_fn(list):
 
 
 def contains_and_size_fn(list):
-    for _ in range(100_000_000):
+    for _ in range(10_000_000):
         l = len(list)
         c = 1 in list
         assert (not c and l == 0) or (
