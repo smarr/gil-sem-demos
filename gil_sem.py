@@ -1,5 +1,6 @@
 from threading import Thread
 from time import time
+import sys
 
 
 class ResultThread(Thread):
@@ -88,4 +89,7 @@ def report_error_or_success(results):
     for r in results:
         if r.assertion:
             raise r.assertion
+        if r.did_time_out:
+            print("Timeout", file=sys.stderr)
+            return
     print("Completed")
