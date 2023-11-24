@@ -2,22 +2,41 @@
 # and generates summary output.
 
 import re
+import os
 import subprocess
 import sys
 import tokenize
 from os import listdir
 
+host_name = os.uname().nodename
 
 # 1. list of python executables to test
-PYTHON_EXECUTABLES = [
-    "../cpython39/python.exe",
-    "../cpython310/python.exe",
-    "../cpython311/python.exe",
-    "../cpython312/python.exe",
-    "../cpython313/python.exe",
-    "../pypy3.9-v7.3.13-macos_arm64/bin/pypy3.9",
-    "../pypy3.10-v7.3.13-macos_arm64/bin/pypy3.10",
-]
+PYTHON_EXECUTABLES = (
+    [
+        "../cpython38/python",
+        "../cpython39/python",
+        "../cpython310/python",
+        "../cpython311/python",
+        "../cpython312/python",
+        "../cpython313/python",
+        "../cpython313-disable-gil/python",
+        "../cpython-colesbury-nogil/python",
+        "../cpython-colesbury-nogil-latest/python",
+        "/data/home/cur/sm951/.local/pypy39/bin/pypy3.9",
+        "/data/home/cur/sm951/.local/pypy/bin/pypy3.10",
+        "/data/home/cur/sm951/.local/graalpy/bin/graalpy",
+    ]
+    if "yuria" in host_name
+    else [
+        "../cpython39/python.exe",
+        "../cpython310/python.exe",
+        "../cpython311/python.exe",
+        "../cpython312/python.exe",
+        "../cpython313/python.exe",
+        "../pypy3.9-v7.3.13-macos_arm64/bin/pypy3.9",
+        "../pypy3.10-v7.3.13-macos_arm64/bin/pypy3.10",
+    ]
+)
 
 print("GIL Semantics Test Runner")
 print("=========================")
